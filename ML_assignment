@@ -1,20 +1,19 @@
 from scipy.io import loadmat
 from numpy import mean
 from numpy import std
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import RepeatedStratifiedKFold
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.naive_bayes import GaussianNB
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 import matplotlib.pyplot as plt
 
-    ## import datasets from .mat format
-def import_datasets():
 
-    train_data = loadmat("data/Data_Train.mat")
-    train_label = loadmat("data/Label_Train.mat")
-    test_data = loadmat("data/Data_test.mat")
-    return train_data['Data_Train'], train_label['Label_Train'], test_data['Data_test']
+    ## define Gaussian Naive Bayes model
+def Bayes(train_data, train_label, test_data):
+
+    model = GaussianNB()
+    y_pred = model.fit(train_data, train_label.ravel()).predict(test_data)
+    print(y_pred)
+
 
     ## define LDA model
 def LDA(train_data, train_label, test_data):
@@ -23,6 +22,7 @@ def LDA(train_data, train_label, test_data):
     X_r_lda = model.fit(train_data, train_label.ravel()).transform(train_data)
     test_label = model.predict(test_data)
     Test_r_lda = model.transform(test_data)
+    print(test_label)
 
     with plt.style.context('seaborn-talk'):
         fig, axes = plt.subplots(1,1,figsize=[20,16],dpi=600)
@@ -31,33 +31,14 @@ def LDA(train_data, train_label, test_data):
             axes.scatter(X_r_lda[train_label.ravel() == i, 0], X_r_lda[train_label.ravel() == i, 1], alpha=1.0, label=target_name, color=color)
             # axes[1].scatter(X_r_pca[y == i, 0], X_r_pca[y == i, 1], alpha=.8, label=target_name, color=color)
         axes.title.set_text('Training Data')
-        # axes[1].title.set_text('PCA for Wine dataset')
         axes.set_xlabel('1st')
         axes.set_ylabel('2nd')
     plt.savefig('LDA_train.png')
 
-    with plt.style.context('seaborn-talk'):
-        fig, axes = plt.subplots(1,1,figsize=[20,16],dpi=600)
-        colors = ['red', 'green', 'blue']
-        for color, i, target_name in zip(colors, [1, 2, 3], 'test'):
-            # axes[1].scatter(X_r_pca[y == i, 0], X_r_pca[y == i, 1], alpha=.8, label=target_name, color=color)
-            axes.scatter(Test_r_lda[test_label.ravel() == i, 0], Test_r_lda[test_label.ravel() == i, 1], alpha=1.0, label=target_name, color=color)
-        # axes[1].title.set_text('PCA for Wine dataset')
-        axes.title.set_text('Test Data')
-        axes.set_xlabel('1st')
-        axes.set_ylabel('2nd')
-    plt.savefig('LDA_test.png')
-
-    print(test_label)
-
-    ## define Gaussian Naive Bayes model
-def Bayes(train_data, train_label, test_data):
-    model = GaussianNB()
-    y_pred = model.fit(train_data, train_label.ravel()).predict(test_data)
-    print(y_pred)
 
     ## define Decision tree model
 def DTree(train_data, train_label, test_data):
+
     model = DecisionTreeClassifier()
     y_pred = model.fit(train_data, train_label.ravel()).predict(test_data)
     print(y_pred)
@@ -70,7 +51,10 @@ def DTree(train_data, train_label, test_data):
 
 if __name__ == '__main__':
 
-    train_data, train_label, test_data = import_datasets()
+    train_data = loadmat("data/Data_Train.mat")['Data_Train']
+    train_label = loadmat("data/Label_Train.mat")['Label_Train']
+    test_data = loadmat("data/Data_test.mat")['Data_test']
+
     Bayes(train_data, train_label, test_data)
     LDA(train_data, train_label, test_data)
     DTree(train_data, train_label, test_data)
